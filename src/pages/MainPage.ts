@@ -28,7 +28,7 @@ export class MainPage extends BasePage {
         });
     }
 
-    async selectRandomDepartureAirport() {
-        await this.mainFilterComponent.setDepartureAirport();
+    async selectRandomDepartureAirport(airportName?: string) {
+        await this.mainFilterComponent.setDepartureAirport(airportName);
     }
 }
