@@ -20,4 +20,15 @@ export class MainPage extends BasePage {
 
         return this;
     }
+
+    async acceptCookies() {
+        await this.browser.clickOnLocator(this.cookiePopUp.getByRole('button', { name: 'Accepteer cookies' }));
+        await this.browser.waitForLocator(this.cookiePopUp, {
+            visible: false,
+        });
+    }
+
+    async selectRandomDepartureAirport() {
+        await this.mainFilterComponent.setDepartureAirport();
+    }
 }

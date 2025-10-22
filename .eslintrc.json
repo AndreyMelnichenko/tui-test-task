@@ -10,12 +10,7 @@
         "plugin:@typescript-eslint/recommended",
         "plugin:@typescript-eslint/recommended-requiring-type-checking"
     ],
-    "plugins": [
-        "unused-imports",
-        "import",
-        "@typescript-eslint",
-        "prettier"
-    ],
+    "plugins": ["unused-imports", "import", "@typescript-eslint", "prettier"],
     "parser": "@typescript-eslint/parser",
     "parserOptions": {
         "ecmaVersion": 12,
@@ -24,7 +19,7 @@
     },
     "rules": {
         "@typescript-eslint/no-redundant-type-constituents": "off",
-        "no-console": "warn",
+        "no-console": "off", // should be warn in production
         "prettier/prettier": "warn",
         "no-unused-vars": "off",
         "unused-imports/no-unused-vars": "off",
@@ -46,16 +41,7 @@
         "import/order": [
             "warn",
             {
-                "groups": [
-                    "type",
-                    "builtin",
-                    "object",
-                    "external",
-                    "internal",
-                    "parent",
-                    "sibling",
-                    "index"
-                ],
+                "groups": ["type", "builtin", "object", "external", "internal", "parent", "sibling", "index"],
                 "pathGroups": [
                     {
                         "pattern": "~/**",
@@ -75,25 +61,13 @@
             },
             {
                 "blankLine": "always",
-                "prev": [
-                    "const",
-                    "let",
-                    "var"
-                ],
+                "prev": ["const", "let", "var"],
                 "next": "*"
             },
             {
                 "blankLine": "any",
-                "prev": [
-                    "const",
-                    "let",
-                    "var"
-                ],
-                "next": [
-                    "const",
-                    "let",
-                    "var"
-                ]
+                "prev": ["const", "let", "var"],
+                "next": ["const", "let", "var"]
             }
         ]
     }
