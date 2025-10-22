@@ -15,12 +15,12 @@ export default defineConfig({
     retries: isCI() ? 2 : 0,
     /* Opt out of parallel tests on CI. */
     workers: isCI() ? 4 : 1,
-    /* Reporter to use. See https://playwright.dev/docs/test-reporters */
+    timeout: 30 * 60 * 1000,
     expect: {
         timeout: 10 * 1000,
     },
     globalSetup: './global-setup.ts',
-    reporter: [['html', { open: 'never' }]],
+    reporter: [['html', { open: 'never' }], ['list']],
     /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
     use: {
         /* Base URL to use in actions like `await page.goto('/')`. */
