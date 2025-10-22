@@ -5,7 +5,7 @@ import { BASE_URL_UI, isCI } from '@config';
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({
-    grep: new RegExp(`.*(${process.env['TAG']}).*`, 'gm'),
+    grep: new RegExp(`.*(${process.env['TAG'] ?? '@smoke'}).*`, 'gm'),
     testDir: './tests',
     /* Run tests in files in parallel */
     fullyParallel: true,
