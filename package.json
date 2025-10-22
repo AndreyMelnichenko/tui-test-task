@@ -37,5 +37,8 @@
     "eslint-plugin-unused-imports": "^4.1.4",
     "prettier": "^3.5.3",
     "ts-node": "^10.9.2"
-  }
+  },
+  "engines": {
+  "node": ">=20.0.0"
+}
 }

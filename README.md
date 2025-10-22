@@ -17,7 +17,7 @@ A test automation project built with Playwright and TypeScript for end-to-end te
 
 Before you begin, ensure you have the following installed:
 
-- [Node.js](https://nodejs.org/) (version 18 or higher)
+- [Node.js](https://nodejs.org/) (version **20.0.0 or higher** - enforced by package.json engines)
 - [npm](https://www.npmjs.com/) or [yarn](https://yarnpkg.com/)
 
 ## 🚀 Installation
@@ -44,23 +44,17 @@ Before you begin, ensure you have the following installed:
 
 ```
 tui-test-task/
-├── .github/               # GitHub workflows and templates
-├── .vscode/               # VS Code configuration
-│   ├── launch.json        # Debug configurations
-│   └── settings.json      # Workspace settings
-├── src/                   # Source code
-│   ├── framework/         # Test framework utilities
-│   ├── helpers/           # Helper functions
-│   └── pages/             # Page Object Model classes
-├── tests/                 # Test files
-│   └── example.spec.ts    # Example test suite
-├── .eslintrc.json         # ESLint configuration
-├── .prettierrc            # Prettier configuration
-├── global-setup.ts        # Global test setup
-├── playwright.config.ts   # Playwright configuration
-├── tsconfig.json          # TypeScript configuration
-├── package.json           # Project dependencies
-└── README.md              # Project documentation
+├── .github/               # GitHub workflows and CI/CD configurations
+├── .vscode/               # VS Code workspace settings and debug configurations
+├── dist/                  # Compiled TypeScript output files
+├── src/                   # Source code directory
+│   ├── framework/         # Core test framework utilities and infrastructure
+│   │   ├── config/        # Environment and application configuration files
+│   │   └── fixtures/      # Custom Playwright fixtures and test contexts
+│   ├── helpers/           # Utility functions and helper libraries
+│   └── pages/             # Page Object Model classes and page abstractions
+│       └── components/    # Reusable page components and UI elements
+└── tests/                 # Test specification files and test suites
 ```
 
 ## 🧪 Running Tests
@@ -145,47 +139,92 @@ The project is configured via `playwright.config.ts`:
 
 Tests are written using Playwright's test framework with Page Object Model pattern.
 
-### Basic Test Structure
-
-```typescript
-import { test, expect } from '@playwright/test';
-
-test('test description @TUI-001', async ({ page }) => {
-    await page.goto('/');
-    await expect(page).toHaveTitle(/Expected Title/);
-});
-```
-
 ### Using Page Objects
 
 ```typescript
-import { test, expect } from '@playwright/test';
-import { MainPage } from '../src/pages/MainPage';
+import { e2eUserTest } from '@src/framework/fixtures';
 
-test('test with page object @TUI-001', async ({ page }) => {
-    const mainPage = new MainPage(page);
-    await mainPage.navigate();
-    await expect(mainPage.title).toBeVisible();
+e2eUserTest('test with page object @TUI-001', async ({ userMainPage }) => {
+    await userMainPage.acceptCookies();
+    await userMainPage.selectRandomDepartureAirport();
 });
+```
+
+### Using Custom Fixtures
+
+```typescript
+import { e2eUserTest } from '@src/framework/fixtures';
+
+e2eUserTest(
+    'Book TUI tour @TUI-001',
+    {
+        tag: ['@TUI-001', '@smoke'],
+    },
+    async ({ userMainPage }) => {
+        await e2eUserTest.step('Accept cookies', async () => {
+            await userMainPage.acceptCookies();
+        });
+
+        await e2eUserTest.step('Select departure airport', async () => {
+            await userMainPage.selectRandomDepartureAirport();
+        });
+    },
+);
 ```
 
 ### Test Tagging
 
-Use tags in test names to filter tests:
+Tests use tags for filtering and organization. Tags can be added in test names or fixture options:
 
 ```typescript
-test('login functionality @TUI-001 @smoke', async ({ page }) => {
+// Method 1: Tags in test name
+e2eUserTest('Accept cookies and select airport @TUI-001 @smoke', async ({ userMainPage }) => {
+    await userMainPage.acceptCookies();
+    await userMainPage.selectRandomDepartureAirport();
+});
+
+// Method 2: Tags in fixture options
+e2eUserTest(
+    'Book TUI tour',
+    {
+        tag: ['@TUI-001', '@smoke'],
+    },
+    async ({ userMainPage }) => {
+        // Test implementation
+    },
+);
+
+// Method 3: Multiple tags for test categorization
+e2eUserTest('Complex booking flow @TUI-002 @regression @booking', async ({ userMainPage }) => {
     // Test implementation
 });
 ```
+
+**Common tag patterns:**
+
+- `@TUI-001`, `@TUI-002` - Test case identifiers
+- `@smoke` - Critical functionality tests
+- `@regression` - Full regression test suite
+- `@booking` - Booking-related functionality
+
+### Framework Features
+
+- **Custom Fixtures**: Pre-configured browser contexts and page objects
+- **UiElements Utility**: Comprehensive element interaction methods
+- **Page Object Model**: Organized page classes with components
+- **Random Helpers**: Utilities for generating test data
+- **String Helpers**: Text manipulation utilities
+- **Component-Based Architecture**: Reusable page components
 
 ### Best Practices
 
 - Use descriptive test names with tags
 - Follow the AAA pattern (Arrange, Act, Assert)
-- Implement Page Object Model for reusability
-- Use Playwright's built-in locators and assertions
-- Add proper wait conditions
+- Leverage custom fixtures for consistent test setup
+- Implement Page Object Model with component architecture
+- Use the UiElements utility class for element interactions
+- Utilize helper functions for data generation
+- Add proper wait conditions and error handling
 - Use environment-specific configurations
 
 ## 📊 Reporting
@@ -223,13 +262,35 @@ The project includes VS Code debug configurations:
 
 ### Manual Debugging
 
-Add `await page.pause()` in your test to open Playwright Inspector:
+**Recommended approach**: Use VS Code debug configurations from `launch.json`:
+
+1. **Set breakpoints** in your test files or page objects
+2. **Run debug configuration**:
+    - `PW-DEBUG`: Debug tests with custom environment variables
+    - `Debug Playwright with Inspector`: Step-by-step debugging with Playwright Inspector
+
+3. **Debug workflow**:
 
 ```typescript
-test('debug test', async ({ page }) => {
-    await page.goto('/');
-    await page.pause(); // Opens Playwright Inspector
-    // Continue with test steps
+e2eUserTest('debug test @TUI-001', async ({ userMainPage }) => {
+    // Set breakpoint here ←
+    await userMainPage.acceptCookies();
+
+    // Set breakpoint here ←
+    await userMainPage.selectRandomDepartureAirport();
+});
+```
+
+**Alternative**: Add `await page.pause()` for inline debugging:
+
+```typescript
+e2eUserTest('inline debug test @TUI-001', async ({ userMainPage }) => {
+    await userMainPage.acceptCookies();
+
+    // Opens Playwright Inspector
+    await userMainPage.page.pause();
+
+    await userMainPage.selectRandomDepartureAirport();
 });
 ```
 
@@ -244,61 +305,30 @@ The project is configured for CI environments:
 - Headless mode enabled on CI
 - TAG-based test filtering support
 
-### GitHub Actions Example
-
-```yaml
-name: Playwright Tests
-on:
-    push:
-        branches: [main, master]
-    pull_request:
-        branches: [main, master]
-jobs:
-    test:
-        timeout-minutes: 60
-        runs-on: ubuntu-latest
-        steps:
-            - uses: actions/checkout@v4
-            - uses: actions/setup-node@v4
-              with:
-                  node-version: lts/*
-            - name: Install dependencies
-              run: npm ci
-            - name: Install Playwright Browsers
-              run: npx playwright install --with-deps
-            - name: Run Playwright tests
-              run: npm test
-              env:
-                  CI: true
-                  TAG: TUI-001
-            - uses: actions/upload-artifact@v4
-              if: always()
-              with:
-                  name: playwright-report
-                  path: playwright-report/
-                  retention-days: 30
-            - uses: actions/upload-artifact@v4
-              if: always()
-              with:
-                  name: test-results
-                  path: test-results/
-                  retention-days: 30
-```
-
 ## 🔧 Development Tools
 
 ### Code Quality
 
 - **ESLint**: JavaScript/TypeScript linting with Prettier integration
 - **Prettier**: Code formatting
-- **TypeScript**: Type checking and compilation
+- **TypeScript**: Type checking and compilation with build output to `dist/`
 - **Pre-commit hooks**: Automated code quality checks
+
+### Framework Architecture
+
+- **UiElements Class**: Centralized UI interaction utilities with comprehensive JSDoc
+- **Custom Fixtures**: Pre-configured test contexts with browser setup
+- **Page Object Model**: Hierarchical page structure with base classes
+- **Component Architecture**: Reusable page components (e.g., MainFilter)
+- **Helper Libraries**: Random data generation and string manipulation utilities
+- **Configuration Management**: Environment-specific settings and base URLs
 
 ### IDE Configuration
 
 - VS Code settings for consistent development experience
-- Debug configurations for Playwright tests
+- Debug configurations for Playwright tests with focus management
 - Recommended extensions and settings
+- TypeScript path mapping for clean imports (@src, @page, @config)
 
 ## 🤝 Contributing
 
