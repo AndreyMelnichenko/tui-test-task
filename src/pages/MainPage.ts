@@ -5,7 +5,7 @@ export class MainPage extends BasePage {
     private readonly cookiePopUp = this.browser.locator('[id="cmBannerDescription"]');
 
     async navigate() {
-        await this.browser.gotoPath(this.pagePrefix);
+        await this.browser.gotoPath(`${this.pagePrefix}`, { timeout: 60000 });
 
         return await this.pageLoaded();
     }

@@ -48,8 +48,19 @@ export class UiElements {
         return this.page.url();
     }
 
-    async gotoPath(path: string): Promise<Page> {
-        await this.page.goto(path);
+    async gotoPath(
+        path: string,
+        options?: {
+            timeout?: number;
+            waitUntil?: 'load' | 'domcontentloaded' | 'networkidle' | 'commit';
+        },
+    ): Promise<Page> {
+        const opts = {
+            timeout: options?.timeout ?? this.defaultTimeout,
+            waitUntil: options?.waitUntil ?? 'domcontentloaded',
+        };
+
+        await this.page.goto(path, opts);
 
         return this.page;
     }
