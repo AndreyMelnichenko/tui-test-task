@@ -1,0 +1,41 @@
+{
+  "name": "tui-test-task",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "playwright test --config=playwright.config.ts",
+    "build": "tsc --build tsconfig.json",
+    "prebuild": "rm -rf dist html-report test-results*",
+    "report": "npx playwright show-report playwright-report",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier 'tests/**/*.ts' --write"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AndreyMelnichenko/tui-test-task.git"
+  },
+  "keywords": [],
+  "author": "A. Melnychenko",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/AndreyMelnichenko/tui-test-task/issues"
+  },
+  "homepage": "https://github.com/AndreyMelnichenko/tui-test-task#readme",
+  "description": "",
+  "devDependencies": {
+    "@playwright/test": "^1.56.1",
+    "@types/node": "^24.9.1",
+    "@typescript-eslint/eslint-plugin": "^8.26.1",
+    "@typescript-eslint/parser": "^8.26.1",
+    "eslint": "^8.26.0",
+    "eslint-config-prettier": "^10.0.2",
+    "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-prettier": "^5.2.3",
+    "eslint-plugin-promise": "^7.2.1",
+    "eslint-plugin-unused-imports": "^4.1.4",
+    "prettier": "^3.5.3",
+    "ts-node": "^10.9.2"
+  }
+}

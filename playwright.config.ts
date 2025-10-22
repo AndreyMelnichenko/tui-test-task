@@ -1,0 +1,47 @@
+import { defineConfig, devices } from '@playwright/test';
+import { BASE_URL_UI, isCI } from '@config';
+
+/**
+ * See https://playwright.dev/docs/test-configuration.
+ */
+export default defineConfig({
+    grep: new RegExp(`.*(${process.env['TAG']}).*`, 'gm'),
+    testDir: './tests',
+    /* Run tests in files in parallel */
+    fullyParallel: true,
+    /* Fail the build on CI if you accidentally left test.only in the source code. */
+    forbidOnly: isCI(),
+    /* Retry on CI only */
+    retries: isCI() ? 2 : 0,
+    /* Opt out of parallel tests on CI. */
+    workers: isCI() ? 4 : 1,
+    /* Reporter to use. See https://playwright.dev/docs/test-reporters */
+    expect: {
+        timeout: 10 * 1000,
+    },
+    globalSetup: './global-setup.ts',
+    reporter: [['html', { open: 'never' }]],
+    /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
+    use: {
+        /* Base URL to use in actions like `await page.goto('/')`. */
+        // baseURL: 'http://127.0.0.1:3000',
+
+        /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
+        trace: 'on-first-retry',
+        screenshot: 'only-on-failure',
+        video: isCI() ? 'retain-on-failure' : 'on',
+        baseURL: BASE_URL_UI(),
+        headless: process.env['CI'] === 'true',
+        actionTimeout: 30 * 1000,
+        navigationTimeout: 30 * 1000,
+        timezoneId: 'Europe/Kyiv',
+    },
+
+    /* Configure projects for major browsers */
+    projects: [
+        {
+            name: 'chromium',
+            use: { ...devices['Desktop Chrome'] },
+        },
+    ],
+});
