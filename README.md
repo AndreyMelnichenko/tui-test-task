@@ -44,11 +44,23 @@ Before you begin, ensure you have the following installed:
 
 ```
 tui-test-task/
+├── .github/               # GitHub workflows and templates
+├── .vscode/               # VS Code configuration
+│   ├── launch.json        # Debug configurations
+│   └── settings.json      # Workspace settings
+├── src/                   # Source code
+│   ├── framework/         # Test framework utilities
+│   ├── helpers/           # Helper functions
+│   └── pages/             # Page Object Model classes
 ├── tests/                 # Test files
 │   └── example.spec.ts    # Example test suite
+├── .eslintrc.json         # ESLint configuration
+├── .prettierrc            # Prettier configuration
+├── global-setup.ts        # Global test setup
 ├── playwright.config.ts   # Playwright configuration
-├── package.json          # Project dependencies
-└── README.md             # Project documentation
+├── tsconfig.json          # TypeScript configuration
+├── package.json           # Project dependencies
+└── README.md              # Project documentation
 ```
 
 ## 🧪 Running Tests
@@ -56,7 +68,15 @@ tui-test-task/
 ### Run all tests
 
 ```bash
+npm test
+# or
 npx playwright test
+```
+
+### Run tests with specific tag
+
+```bash
+TAG=TUI-001 npm test
 ```
 
 ### Run tests in headed mode (with browser UI)
@@ -77,10 +97,26 @@ npx playwright test tests/example.spec.ts
 npx playwright test --debug
 ```
 
-### Run tests with specific browser
+### View test report
 
 ```bash
-npx playwright test --project=chromium
+npm run report
+```
+
+### Code quality commands
+
+```bash
+# Lint code
+npm run lint
+
+# Fix linting issues
+npm run lint:fix
+
+# Format code
+npm run format
+
+# Build TypeScript
+npm run build
 ```
 
 ## ⚙️ Configuration
@@ -88,54 +124,125 @@ npx playwright test --project=chromium
 The project is configured via `playwright.config.ts`:
 
 - **Test Directory**: `./tests`
-- **Parallel Execution**: Enabled
+- **Test Filtering**: By TAG environment variable
+- **Parallel Execution**: Enabled (4 workers on CI, 1 locally)
 - **Browsers**: Chromium (Desktop Chrome)
-- **Reporter**: HTML
+- **Reporter**: HTML (opens never)
 - **Trace**: On first retry
+- **Screenshots**: Only on failure
+- **Video**: On (retain on failure for CI)
 - **Retries**: 2 on CI, 0 locally
+- **Timezone**: Europe/Kyiv
+- **Global Setup**: Configured via `global-setup.ts`
+
+### Environment Variables
+
+- `TAG`: Filter tests by tag (e.g., `TUI-001`)
+- `CI`: Determines if running in CI environment
+- `BASE_URL_UI`: Base URL for the application under test
 
 ## ✍️ Writing Tests
 
-Tests are written using Playwright's test framework. Example structure:
+Tests are written using Playwright's test framework with Page Object Model pattern.
+
+### Basic Test Structure
 
 ```typescript
 import { test, expect } from '@playwright/test';
 
-test('test description', async ({ page }) => {
-    await page.goto('https://example.com');
+test('test description @TUI-001', async ({ page }) => {
+    await page.goto('/');
     await expect(page).toHaveTitle(/Expected Title/);
+});
+```
+
+### Using Page Objects
+
+```typescript
+import { test, expect } from '@playwright/test';
+import { MainPage } from '../src/pages/MainPage';
+
+test('test with page object @TUI-001', async ({ page }) => {
+    const mainPage = new MainPage(page);
+    await mainPage.navigate();
+    await expect(mainPage.title).toBeVisible();
+});
+```
+
+### Test Tagging
+
+Use tags in test names to filter tests:
+
+```typescript
+test('login functionality @TUI-001 @smoke', async ({ page }) => {
+    // Test implementation
 });
 ```
 
 ### Best Practices
 
-- Use descriptive test names
+- Use descriptive test names with tags
 - Follow the AAA pattern (Arrange, Act, Assert)
-- Use page object model for complex applications
-- Utilize Playwright's built-in locators and assertions
+- Implement Page Object Model for reusability
+- Use Playwright's built-in locators and assertions
+- Add proper wait conditions
+- Use environment-specific configurations
 
 ## 📊 Reporting
 
 After running tests, view the HTML report:
 
 ```bash
+npm run report
+# or
 npx playwright show-report
 ```
 
 Test results include:
 
-- Test execution status
+- Test execution status and duration
 - Screenshots on failure
-- Traces for debugging
-- Performance metrics
+- Video recordings (on by default, retained on failure for CI)
+- Traces for debugging (on first retry)
+- Performance metrics and timing data
+- Test artifacts in `test-results/` directory
+
+## 🐛 Debugging
+
+### VS Code Debugging
+
+The project includes VS Code debug configurations:
+
+1. **PW-DEBUG**: Run tests with debugger attached
+2. **Debug Playwright with Inspector**: Use Playwright Inspector for step-by-step debugging
+
+### Debug Settings
+
+- `debug.focusWindowOnBreak`: Automatically focuses VS Code on breakpoints
+- `debug.focusEditorOnBreak`: Focuses editor when hitting breakpoints
+
+### Manual Debugging
+
+Add `await page.pause()` in your test to open Playwright Inspector:
+
+```typescript
+test('debug test', async ({ page }) => {
+    await page.goto('/');
+    await page.pause(); // Opens Playwright Inspector
+    // Continue with test steps
+});
+```
 
 ## 🔄 CI/CD
 
 The project is configured for CI environments:
 
 - Tests run with 2 retries on CI
-- Single worker on CI for stability
+- 4 workers on CI for faster execution
 - Fails build if `test.only` is found
+- Video recording retained on failure for CI
+- Headless mode enabled on CI
+- TAG-based test filtering support
 
 ### GitHub Actions Example
 
@@ -160,23 +267,55 @@ jobs:
             - name: Install Playwright Browsers
               run: npx playwright install --with-deps
             - name: Run Playwright tests
-              run: npx playwright test
+              run: npm test
+              env:
+                  CI: true
+                  TAG: TUI-001
             - uses: actions/upload-artifact@v4
               if: always()
               with:
                   name: playwright-report
                   path: playwright-report/
                   retention-days: 30
+            - uses: actions/upload-artifact@v4
+              if: always()
+              with:
+                  name: test-results
+                  path: test-results/
+                  retention-days: 30
 ```
+
+## 🔧 Development Tools
+
+### Code Quality
+
+- **ESLint**: JavaScript/TypeScript linting with Prettier integration
+- **Prettier**: Code formatting
+- **TypeScript**: Type checking and compilation
+- **Pre-commit hooks**: Automated code quality checks
+
+### IDE Configuration
+
+- VS Code settings for consistent development experience
+- Debug configurations for Playwright tests
+- Recommended extensions and settings
 
 ## 🤝 Contributing
 
 1. Fork the repository
-2. Create a feature branch
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
 3. Make your changes
-4. Add tests for new functionality
-5. Ensure all tests pass
-6. Submit a pull request
+4. Run code quality checks:
+    ```bash
+    npm run lint
+    npm run format
+    npm run build
+    ```
+5. Add tests for new functionality with appropriate tags
+6. Ensure all tests pass: `npm test`
+7. Commit your changes (`git commit -m 'Add amazing feature'`)
+8. Push to the branch (`git push origin feature/amazing-feature`)
+9. Open a Pull Request
 
 ## 📝 License
 
