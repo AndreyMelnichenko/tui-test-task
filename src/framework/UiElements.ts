@@ -291,4 +291,24 @@ export class UiElements {
     async getProperty(locator: Locator, property: string): Promise<string> {
         return await locator.evaluate((el: HTMLElement) => el[property as keyof HTMLElement] as string);
     }
+
+    /**
+     * Fills an input element with the specified value.
+     * @param locator - The locator of the input element.
+     * @param value - The value to fill into the input element.
+     */
+    async fillInput(locator: Locator, value: string): Promise<void> {
+        await this.waitForLocator(locator);
+        await locator.fill(value);
+    }
+
+    /**
+     * Selects an option in a dropdown element.
+     * @param locator - The locator of the dropdown element.
+     * @param value - The value to select.
+     */
+    async selectOption(locator: Locator, value: string): Promise<void> {
+        await this.waitForLocator(locator);
+        await locator.selectOption(value);
+    }
 }

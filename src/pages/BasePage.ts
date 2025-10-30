@@ -18,7 +18,7 @@ export abstract class BasePage {
     }
 
     abstract pageLoaded(pageParam?: string): Promise<this> | this;
-    abstract navigate(slug?: string): Promise<this>;
+    abstract navigate(slug?: string): Promise<this> | this;
     abstract pagePrefix: string;
 
     async reloadPage(): Promise<void> {
