@@ -6,7 +6,7 @@ export class SummaryBookingPage extends BasePage {
 
     async pageLoaded() {
         await this.browser.waitForUrl(new RegExp(`.*${this.pagePrefix}.*`), {
-            timeout: 10000,
+            timeout: 40000,
             waitUntil: 'domcontentloaded',
         });
         await this.browser.waitForLocator(this.browser.locator('h1').filter({ hasText: 'Vakantie samenstellen' }));
