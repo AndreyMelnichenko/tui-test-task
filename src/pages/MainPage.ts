@@ -32,29 +32,32 @@ export class MainPage extends BasePage {
     }
 
     async selectRandomDepartureAirport(airportName?: string) {
-        await this.mainFilterComponent.setDepartureAirport(airportName);
+        await this.mainFilterComponent.departureAirportFilter.setDepartureAirport(airportName);
+        await this.mainFilterComponent.saveForm('Departure');
     }
 
     async selectRandomDestinationAirport(countryName?: string, cityName?: string) {
-        return await this.mainFilterComponent.setDestinationAirport(countryName, cityName);
+        await this.mainFilterComponent.destinationAirportFilter.setDestinationAirport(countryName, cityName);
+        await this.mainFilterComponent.saveForm('Destination');
     }
 
     async selectDepartureDate(daysTolerance: FilterDayTolerance = '0') {
-        while (!(await this.mainFilterComponent.isMonthAvailable())) {
+        while (!(await this.mainFilterComponent.departureDateFilter.isMonthAvailable())) {
             console.log('Month is not available, resetting destination airport and trying again...');
             await this.mainFilterComponent.resetFormSettings('Destination');
-            await this.mainFilterComponent.closeDestinationAirportDropdown();
-            await this.mainFilterComponent.setDestinationAirport();
+            await this.mainFilterComponent.destinationAirportFilter.closeDestinationAirportDropdown();
+            await this.mainFilterComponent.destinationAirportFilter.setDestinationAirport();
         }
 
-        return await this.mainFilterComponent.setDepartureDate(daysTolerance);
+        await this.mainFilterComponent.departureDateFilter.setDepartureDate(daysTolerance);
+        await this.mainFilterComponent.saveForm('Date');
     }
 
     async selectTravelers(adultsCount: number, childrenAges?: Array<number>) {
-        await this.mainFilterComponent.openTravelersDropdown();
-        await this.mainFilterComponent.selectAdultsCount(adultsCount);
+        await this.mainFilterComponent.travelersFilter.openTravelersDropdown();
+        await this.mainFilterComponent.travelersFilter.selectAdultsCount(adultsCount);
         if (childrenAges) {
-            await this.mainFilterComponent.selectChildrenCount(childrenAges);
+            await this.mainFilterComponent.travelersFilter.selectChildrenCount(childrenAges);
         }
     }
 
